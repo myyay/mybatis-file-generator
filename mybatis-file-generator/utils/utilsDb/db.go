@@ -8,10 +8,12 @@ import (
 )
 
 type MysqlTable struct {
-	TableName       string
-	DomainClassName string
-	DaoClassName    string
-	Columns         []MysqlColumn
+	TableName          string
+	DomainClassPackage string
+	DomainClassName    string
+	DaoClassNPackage   string
+	DaoClassName       string
+	Columns            []MysqlColumn
 }
 
 type MysqlColumn struct {
@@ -69,7 +71,7 @@ func CloseQuietly(closer io.Closer) {
 	}
 }
 
-var typeForMysqlToJava = map[string]string{
+var typeForMysqlToJdbcType = map[string]string{
 	"int":                "INTEGER",
 	"integer":            "INTEGER",
 	"tinyint":            "TINYINT",
@@ -107,6 +109,47 @@ var typeForMysqlToJava = map[string]string{
 	"varbinary":          "VARCHAR",
 }
 
+var typeForMysqlToJavaType = map[string]string{
+	"int":                "Integer",
+	"integer":            "Integer",
+	"tinyint":            "Integer",
+	"smallint":           "Integer",
+	"mediumint":          "Integer",
+	"bigint":             "Long",
+	"int unsigned":       "Integer",
+	"integer unsigned":   "Integer",
+	"tinyint unsigned":   "Integer",
+	"smallint unsigned":  "Integer",
+	"mediumint unsigned": "Integer",
+	"bigint unsigned":    "Long",
+	"bit":                "Integer",
+	"bool":               "Boolean",
+	"enum":               "String",
+	"set":                "String",
+	"varchar":            "String",
+	"char":               "String",
+	"tinytext":           "String",
+	"mediumtext":         "String",
+	"text":               "String",
+	"longtext":           "String",
+	"blob":               "String",
+	"tinyblob":           "String",
+	"mediumblob":         "String",
+	"longblob":           "String",
+	"date":               "Date", // time.Time or string
+	"datetime":           "Date", // time.Time or string
+	"timestamp":          "Date", // time.Time or string
+	"time":               "Date", // time.Time or string
+	"float":              "BigDecimal",
+	"double":             "BigDecimal",
+	"decimal":            "BigDecimal",
+	"binary":             "String",
+	"varbinary":          "String",
+}
+
 func GetJdbcType(tp string) string {
-	return typeForMysqlToJava[tp]
+	return typeForMysqlToJdbcType[tp]
+}
+func GetJavaType(tp string) string {
+	return typeForMysqlToJdbcType[tp]
 }

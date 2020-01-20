@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"database/sql"
-	"fmt"
 	"log"
 	"myyay/mybatis-file-generator/conf"
 	"myyay/mybatis-file-generator/connection"
@@ -29,16 +28,19 @@ func main() {
 	addColumnInfo(tables, db)
 	log.Println(tables)
 
-	templateFile := "./mybatis-file-generator/templates/standard_mapper.tmpl"
 	outputPath := "d:/test/"
+
+	mapperTemplate := "./mybatis-file-generator/templates/standard_mapper.tmpl"
+	daoTemplate := "./mybatis-file-generator/templates/standard_dao.tmpl"
+	domainTemplate := "./mybatis-file-generator/templates/standard_domain.tmpl"
 	mapperPath := ""
 	daoPath := ""
 	domainPath := ""
 	mapperPackage := "mapper"
 	daoPackage := "com.yay.dao"
 	domainPackage := "com.yay.domain"
-	fmt.Println(mapperPath, daoPath, domainPath, mapperPackage, daoPackage, domainPackage)
 
+	//create Dirs
 	_ = os.MkdirAll(outputPath+domainPath+strings.ReplaceAll(domainPackage, ".", "/"), 0777)
 	_ = os.MkdirAll(outputPath+daoPath+strings.ReplaceAll(daoPackage, ".", "/"), 0777)
 	_ = os.MkdirAll(outputPath+mapperPath+strings.ReplaceAll(mapperPackage, ".", "/"), 0777)
@@ -48,22 +50,29 @@ func main() {
 		tables[i].DaoClassName = daoPackage + className + "Dao"
 		tables[i].DomainClassName = domainPackage + className
 
-		mapperFileResultPath := outputPath + mapperPath + strings.ReplaceAll(mapperPackage, ".", "/") + "/" + className + "Dao.xml"
-
-		t, err := template.ParseFiles(templateFile)
-		utilsErr.LogFatal("parse template failed : "+templateFile, err)
-		resultFile, err := os.Create(mapperFileResultPath)
-		defer utilsDb.CloseQuietly(resultFile)
-		writer := bufio.NewWriter(resultFile)
-		utilsErr.LogFatal("create file failed : "+mapperFileResultPath, err)
-		err = t.Execute(writer, tables[i])
-		utilsErr.LogFatal("write file failed : "+mapperFileResultPath, err)
-		writer.Flush()
-
+		writeFile(outputPath, daoPath, daoPackage, className, daoTemplate, tables, i)
+		writeFile(outputPath, domainPath, domainPackage, className, domainTemplate, tables, i)
+		writeFile(outputPath, mapperPath, mapperPackage, className, mapperTemplate, tables, i)
 	}
 
 }
 
+//写入模板文件
+func writeFile(outputPath string, mapperPath string, mapperPackage string, className string, mapperTemplate string, tables []utilsDb.MysqlTable, i int) {
+	mapperFileResultPath := outputPath + mapperPath + strings.ReplaceAll(mapperPackage, ".", "/") + "/" + className + "Dao.xml"
+
+	t, err := template.ParseFiles(mapperTemplate)
+	utilsErr.LogFatal("parse template failed : "+mapperTemplate, err)
+	resultFile, err := os.Create(mapperFileResultPath)
+	defer utilsDb.CloseQuietly(resultFile)
+	writer := bufio.NewWriter(resultFile)
+	utilsErr.LogFatal("create file failed : "+mapperFileResultPath, err)
+	err = t.Execute(writer, tables[i])
+	utilsErr.LogFatal("write file failed : "+mapperFileResultPath, err)
+	writer.Flush()
+}
+
+//查询数据库，补上列信息
 func addColumnInfo(tables []utilsDb.MysqlTable, db *sql.DB) {
 	for i := range tables {
 		columns, err := db.Query("desc " + tables[i].TableName)
@@ -113,6 +122,7 @@ func makeCacheList(size int) []interface{} {
 	return cache
 }
 
+//获取有哪些表
 func getTables(db *sql.DB) []utilsDb.MysqlTable {
 	tablesRes, err := db.Query("show tables")
 	utilsErr.LogPanic("show tables", err)
