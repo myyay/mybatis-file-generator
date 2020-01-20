@@ -50,7 +50,7 @@
       )
     values (
        {{range $i, $item := .Columns}}{{if not .IsAutoIncrement}}{{if $i}},
-              {{end}}{{$item.ColumnName}} = #{ {{$item.PropertyName}}, jdbcType="{{$item.JdbcType}}"}{{end}}{{ end }}
+       {{end}}{{$item.ColumnName}} = #{ {{$item.PropertyName}}, jdbcType="{{$item.JdbcType}}"}{{end}}{{ end }}
       )
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="{{.DomainClassName}}">
