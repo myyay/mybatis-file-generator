@@ -1,4 +1,4 @@
-package utils
+package utilsDb
 
 import (
 	"fmt"
@@ -23,5 +23,7 @@ func TestCompile(t *testing.T) {
 	fmt.Println("updateDate", compile.FindStringSubmatch(updateDate))
 	fmt.Println("amount", compile.FindStringSubmatch(amount))
 	fmt.Println("version", compile.FindStringSubmatch(version))
+
+	fmt.Println(MysqlTable{})
 
 }
